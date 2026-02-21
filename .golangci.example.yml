@@ -1,0 +1,22 @@
+linters-settings:
+  custom:
+    loglint:
+      path: ./loglint.so
+      description: Checks slog/zap log messages.
+      settings:
+        rules:
+          lowercase_start: true
+          english_only: true
+          no_special: true
+          no_sensitive: true
+        allowed:
+          allow_punct: false
+        sensitive:
+          keywords:
+            - password
+            - token
+            - api_key
+
+linters:
+  enable:
+    - loglint
