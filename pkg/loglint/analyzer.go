@@ -345,11 +345,10 @@ func containsDisallowedSymbols(s string, allowPunct bool) bool {
 		if r == '\n' || r == '\t' || r == '\r' || unicode.IsSpace(r) {
 			continue
 		}
-		// "спецсимволы/эмодзи" = любой non-ASCII
 		if r > 127 {
 			return true
 		}
-		// ASCII пунктуацию/символы НЕ баним
+
 	}
 	return false
 }
@@ -360,17 +359,16 @@ func mayLeakSensitive(expr ast.Expr, parts []string, idents []string, cfg Sensit
 		return false
 	}
 
-	// Is this message expression "dynamic" (i.e., likely to include runtime values)?
 	dynamic := !isStaticString(expr)
 
-	// Check identifiers/selector names always — logging `password` variable is suspicious.
+	// Check identifiers/selector names always — logging password variable is suspicious.
 	for _, id := range idents {
 		if matchesKeyword(id, keywords) {
 			return true
 		}
 	}
 
-	// For static literals, we only check textual keywords if CheckLiterals is enabled.
+	// For static literals we only check textual keywords if CheckLiterals is enabled.
 	if !dynamic && !cfg.CheckLiterals {
 		return false
 	}
@@ -380,7 +378,7 @@ func mayLeakSensitive(expr ast.Expr, parts []string, idents []string, cfg Sensit
 		if matchesKeyword(lp, keywords) {
 			return true
 		}
-		// key-like patterns even without keyword list precision (e.g. "token:" "api_key=")
+		// key-like patterns even without keyword list precision
 		if looksLikeSecretLabel(lp) {
 			return true
 		}
@@ -389,7 +387,7 @@ func mayLeakSensitive(expr ast.Expr, parts []string, idents []string, cfg Sensit
 }
 
 func isStaticString(expr ast.Expr) bool {
-	// Consider it static if it is a literal string.
+	// Consider it static if it is a literal string
 	switch e := expr.(type) {
 	case *ast.BasicLit:
 		return e.Kind == token.STRING
@@ -425,7 +423,6 @@ func matchesKeyword(text string, keywords []string) bool {
 }
 
 func looksLikeSecretLabel(s string) bool {
-	// Heuristic: "password:", "token=", "api_key:" etc.
 	labels := []string{"password", "passwd", "pwd", "token", "api_key", "apikey", "secret", "private_key", "authorization", "bearer"}
 	for _, l := range labels {
 		if strings.Contains(s, l+":") || strings.Contains(s, l+"=") {
@@ -446,7 +443,7 @@ func fixStripNonASCII(lit *ast.BasicLit) (analysis.SuggestedFix, bool) {
 
 	changed := false
 	for _, r := range orig {
-		// Preserve ASCII whitespace and printable ASCII.
+		// Preserve ASCII whitespace and printable ASCII
 		if r <= 127 {
 			b.WriteRune(r)
 			continue
