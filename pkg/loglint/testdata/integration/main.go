@@ -21,6 +21,7 @@ func main() {
 	token := "abc"
 	slog.Info("token=" + token)
 
+	// Zap (real dependency)
 	logger := zap.NewNop()
 	logger.Info("Hello from zap")
 	logger.Sugar().Infow("password=" + token)

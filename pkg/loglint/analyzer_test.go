@@ -24,6 +24,14 @@ func TestIntegration_ModuleMode(t *testing.T) {
 
 	// Run the tool against an isolated fixture module that depends on real zap.
 	fixture := filepath.Clean(filepath.Join(build.Dir, "pkg", "loglint", "testdata", "integration"))
+
+	// Ensure the fixture module has go.sum entries (packages.Load uses `go list`, which does not write go.sum).
+	dl := exec.Command("go", "mod", "download")
+	dl.Dir = fixture
+	dl.Env = append(os.Environ(), "GO111MODULE=on", "GOWORK=off")
+	if out, err := dl.CombinedOutput(); err != nil {
+		t.Fatalf("failed to prepare fixture module (go mod download): %v\n%s", err, out)
+	}
 	run := exec.Command(tool, "./...")
 	run.Dir = fixture
 	run.Env = append(os.Environ(), "GO111MODULE=on")

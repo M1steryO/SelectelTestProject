@@ -81,10 +81,64 @@ Note: golangci-lint uses Viper, which normalizes keys to lowercase.
 
 ---
 
+## Configuration
+
+### Standalone (`go run ./cmd/loglint`)
+
+You can provide settings via a YAML/JSON config file:
+
+```bash
+go run ./cmd/loglint -config ./loglint.yml ./...
+```
+
+Example `loglint.yml`:
+
+```yaml
+rules:
+  lowercase_start: true
+  english_only: true
+  no_special: true
+  no_sensitive: true
+
+sensitive:
+  # custom patterns for sensitive data (substring match)
+  keywords: ["password", "token", "api_key", "secret", "authorization", "bearer", "session", "jwt"]
+  check_literals: false
+
+allowed:
+  allow_punct: false
+```
+
+### golangci-lint plugin
+
+Settings are passed via `.golangci.yml` under `linters-settings.custom.<name>.settings`
+(see the example earlier in this README).
+
+---
+
+## Auto-fix
+
+Suggested fixes are provided for **string literals** for:
+- lowercase first letter (Rule 1)
+- removing non-ASCII characters (helps Rule 2 and Rule 3)
+
+Dynamic messages are not auto-fixed.
+
+---
+
 ## Tests
+
+This repo uses an **integration test in module mode** so the fixture can depend on the real `go.uber.org/zap` module:
 
 ```bash
 go test ./...
 ```
 
-Test sources are in `pkg/loglint/testdata/` and run via `analysistest`.
+Fixture module: `pkg/loglint/testdata/integration`
+
+---
+
+## CI/CD
+
+- GitHub Actions workflow: `.github/workflows/ci.yml`
+- GitLab pipeline: `.gitlab-ci.yml`

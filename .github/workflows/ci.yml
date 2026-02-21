@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ["1.22.x", "stable"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: true
+      - name: Test
+        run: go test ./...
+
+      - name: Build standalone
+        run: go build ./cmd/loglint
+
+      - name: Build golangci-lint plugin
+        run: CGO_ENABLED=1 go build -buildmode=plugin -o loglint.so ./plugin/loglint.go
