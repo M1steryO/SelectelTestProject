@@ -54,7 +54,7 @@ linters-settings:
           allow_punct: false
 ```
 
-Enable the linter (if you have disable-all):
+Enable the linter (if you have disable-all)
 
 ```yaml
 linters:
